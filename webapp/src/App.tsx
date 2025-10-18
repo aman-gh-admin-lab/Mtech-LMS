@@ -4,28 +4,31 @@ import { LocationGenerics, routes } from "./routes";
 import MainLayout from "./layouts/MainLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react"; // Add these lines
+import { useUser, SignInButton, UserButton } from "@clerk/clerk-react"; // Import useUser
 
 const location = new ReactLocation<LocationGenerics>();
 
 function App() {
+  const { isSignedIn } = useUser();
+
   return (
     <>
-      {/* Clerk Auth Header */}
+      {/* Auth header */}
       <header style={{ display: "flex", justifyContent: "flex-end", padding: "1rem" }}>
-        <SignedOut>
+        {!isSignedIn ? (
           <SignInButton />
-        </SignedOut>
-        <SignedIn>
+        ) : (
           <UserButton />
-        </SignedIn>
+        )}
       </header>
 
+      {/* Your existing router and layout */}
       <Router location={location} routes={routes}>
         <MainLayout>
           <Outlet />
         </MainLayout>
       </Router>
+
       <ToastContainer position="top-center" />
     </>
   );
