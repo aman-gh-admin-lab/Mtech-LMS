@@ -5,6 +5,12 @@ import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ClerkProvider } from "@clerk/clerk-react"; // Add this line
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
 
 async function main() {
   console.log({
@@ -24,10 +30,12 @@ async function main() {
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+        <QueryClientProvider client={queryClient}>
           <App />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ClerkProvider>
     </React.StrictMode>
   );
 }
