@@ -9,6 +9,9 @@ import Dashboard from "./pages/dashboard";
 import ManageCourse from "./pages/ManageCourse";
 import ManageCourses from "./pages/ManageCourses";
 
+// 1. Add this import
+import AdminRoute from "./components/AdminRoute";
+
 export type LocationGenerics = MakeGenerics<{
   LoaderData: {
     // ordersForStudent: ICourse[];
@@ -32,7 +35,12 @@ export const routes: Route<LocationGenerics>[] = [
   },
   {
     path: "admin",
-    element: <Admin />,
+    // 2. Wrap Admin in AdminRoute here!
+    element: (
+      <AdminRoute>
+        <Admin />
+      </AdminRoute>
+    ),
     children: [
       {
         path: "/",
