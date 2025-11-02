@@ -15,10 +15,14 @@ function MainLayout(props: MainLayoutProps) {
   return (
     <div>
       {router.pending ? <TopBarLoader /> : null}
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 drop-shadow-lg">
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 drop-shadow-lg h-16">
         <div>
           <Link to={"/"}>
-            <img src={logoSrc} alt="Digital Lync Logo" />
+            <img
+              src={logoSrc}
+              alt="Logo"
+              className="h-12 w-auto max-w-[180px] object-contain"
+            />
           </Link>
         </div>
 
@@ -26,9 +30,8 @@ function MainLayout(props: MainLayoutProps) {
           {location.current.pathname.includes("/admin") ? null : (
             <div>
               <Link
-                // target={"_blank"}
                 to={"admin"}
-                className="link-primary  text-blue-500"
+                className="link-primary text-blue-500"
               >
                 <span className="flex items-center">
                   Admin Portal <FaExternalLinkAlt className="pl-1" />
