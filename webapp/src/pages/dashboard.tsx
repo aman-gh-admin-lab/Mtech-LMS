@@ -20,8 +20,8 @@ function Dashboard() {
         <Banner />
         <div className="mx-auto max-w-4xl py-8 text-center">
           <Text>
-            <h2>{"There's nothing here..."}</h2>
-            <p>
+            <h2 className="text-white">{"Courses will be listed here"}</h2>
+            <p className="text-white">
               Enrolled courses will appear here, click below button to contact
               the academy.
             </p>
