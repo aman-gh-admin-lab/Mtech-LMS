@@ -26,7 +26,7 @@ function Dashboard() {
               the academy.
             </p>
             <a
-              href="mailto:kona@konamars.com"
+              href="mailto:mdaman8639@gmail.com"
               className="btn btn-primary capitalize"
             >
               Enroll Me!
