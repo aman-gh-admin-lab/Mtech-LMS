@@ -46,21 +46,20 @@ pipeline {
         }
 
         stage('Deploy Frontend Container') {
-            steps {
-                script {
-                    sh """
+    steps {
+        script {
+            sh '''
             docker pull ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
             docker stop ${FRONTEND_CONTAINER} || true
             docker rm ${FRONTEND_CONTAINER} || true
 
-            docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} \
-                ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+            docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
 
-            echo "🌐 Frontend running at: http://$(hostname -I | awk '{print \$1}')"
-            """
-                }
-            }
+            echo "🌐 Frontend running at: http://$(hostname -I | awk '{print $1}')"
+            '''
         }
+    }
+}
     }
 
     post {
