@@ -5,7 +5,7 @@ pipeline {
         REGISTRY = "amanmohammad2608"
         IMAGE_NAME = "lms-frontend"
         FRONTEND_CONTAINER = "lms-frontend"
-        BACKEND_URL = "http://<backend-ip>:5000"
+        BACKEND_URL = "http://172.173.144.198:8080"
     }
 
     stages {
