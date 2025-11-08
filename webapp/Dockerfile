@@ -1,21 +1,17 @@
-# Docker file for react app created using vite
-FROM node:latest as build
-# Create app directory
-WORKDIR /app
-# Install app dependencies
+# ---------- Stage 1: Build ----------
+FROM node:20-alpine AS build
+WORKDIR /frontend
+
 COPY package*.json ./
-RUN npm install
-# Build app
+RUN npm install --legacy-peer-deps
+
 COPY . .
 RUN npm run build
 
-# Docker file for nginx server to serve react app build files (spa routing)
+# ---------- Stage 2: Serve ----------
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-# This is required to make nginx serve index.html for all routes
-COPY nginx.conf /etc/nginx/conf.d/default.conf 
+COPY --from=build /frontend/dist /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf  # Uncomment if using React Router
+
 EXPOSE 80
-# If you add a custom CMD in the Dockerfile, be sure to include -g daemon off; 
-# in the CMD in order for nginx to stay in the foreground, so that Docker can 
-# track the process properly (otherwise your container will stop immediately after starting)!
 CMD ["nginx", "-g", "daemon off;"]
