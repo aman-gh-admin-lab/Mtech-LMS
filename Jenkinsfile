@@ -54,8 +54,6 @@ pipeline {
             docker rm ${FRONTEND_CONTAINER} || true
 
             docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
-
-            echo "🌐 Frontend running at: http://$(hostname -I | awk '{print $1}')"
             '''
         }
     }
