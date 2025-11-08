@@ -49,15 +49,15 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker pull ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
-                    docker stop ${FRONTEND_CONTAINER} || true
-                    docker rm ${FRONTEND_CONTAINER} || true
+            docker pull ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+            docker stop ${FRONTEND_CONTAINER} || true
+            docker rm ${FRONTEND_CONTAINER} || true
 
-                    docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+            docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} \
+                ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
 
-
-                    echo "🌐 Frontend is running at: http://$(hostname -I | awk '{print $1}')"
-                    """
+            echo "🌐 Frontend running at: http://$(hostname -I | awk '{print \$1}')"
+            """
                 }
             }
         }
