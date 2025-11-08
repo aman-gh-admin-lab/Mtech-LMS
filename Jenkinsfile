@@ -1,51 +1,74 @@
 pipeline {
     agent any
+
+    environment {
+        REGISTRY = "amanmohammad2608"
+        IMAGE_NAME = "lms-frontend"
+        FRONTEND_CONTAINER = "lms-frontend"
+        BACKEND_URL = "http://<backend-ip>:5000"
+    }
+
     stages {
-        stage('Code Analysis') {
-            steps {
-                echo 'CODE QUALITY CHECK'
-                // Below command works in jenkins 
-                sh 'cd webapp && sudo docker run --rm -e SONAR_HOST_URL="http://3.147.64.186:9000" -v ".:/usr/src" -e SONAR_TOKEN="sqp_64e4ddd0325ea51aa54516d2e8aa0af7c23a48c0" sonarsource/sonar-scanner-cli -Dsonar.projectKey=lms'
-                echo 'CODE QUALITY COMPLETED'
-            }
-        }
-        stage('Build Artifacts') {
-            steps {
-                echo 'Build LMS'
-                sh 'cd webapp && npm install && npm run build'
-                echo 'Build Completed'
-            }
-        }
-        stage('Release Artifacts') {
-            steps {
-               script {
-                   def packageJson = readJSON file: 'webapp/package.json'
-                   def packageJSONVersion = packageJson.version
-                   echo "${packageJSONVersion}"
-                   sh "zip webapp/lms-${packageJSONVersion}.zip -r webapp/dist"
-                   sh "curl -v -u admin:lms12345 --upload-file webapp/lms-${packageJSONVersion}.zip http://3.147.64.186:8081/repository/lms/"
-               }
-           }
 
-        }
-        stage('Deploy') {
+        stage('Checkout Code') {
             steps {
-               script {
-                   def packageJson = readJSON file: 'webapp/package.json'
-                   def packageJSONVersion = packageJson.version
-                   echo "${packageJSONVersion}"
-                   sh "curl -u admin:lms12345 -X GET \'http://3.147.64.186:8081/repository/lms/lms-${packageJSONVersion}.zip\' --output lms-'${packageJSONVersion}'.zip"
-                   sh 'sudo rm -rf /var/www/html/*'
-                   sh "sudo unzip -o lms-'${packageJSONVersion}'.zip"
-                   sh "sudo cp -r webapp/dist/* /var/www/html"
-               }
-           }
-
-        }
-        stage('Cleanup') {
-            steps {
-                cleanWs()
+                git branch: 'dev', url: 'https://github.com/aman-gh-admin-lab/Mtech-LMS.git'
             }
+        }
+
+        stage('Read Version') {
+            steps {
+                script {
+                    def pkg = readJSON file: 'webapp/package.json'
+                    env.APP_VERSION = pkg.version
+                    echo "Building version ${env.APP_VERSION}"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION} ./webapp"
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Frontend Container') {
+            steps {
+                script {
+                    sh """
+                    docker pull ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+                    docker stop ${FRONTEND_CONTAINER} || true
+                    docker rm ${FRONTEND_CONTAINER} || true
+
+                    docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+
+
+                    echo "🌐 Frontend is running at: http://$(hostname -I | awk '{print $1}')"
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ LMS Frontend Deployed Successfully!"
+        }
+        failure {
+            echo "❌ Deployment Failed!"
         }
     }
 }
