@@ -2,10 +2,8 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "amanmohammad2608"
         IMAGE_NAME = "lms-frontend"
         FRONTEND_CONTAINER = "lms-frontend"
-        BACKEND_URL = "http://172.173.144.198:8080"
     }
 
     stages {
@@ -29,31 +27,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION} ./webapp"
+                    sh "docker build -t ${IMAGE_NAME}:${APP_VERSION} ./webapp"
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
-                    """
-                }
-            }
-        }
 
         stage('Deploy Frontend Container') {
     steps {
         script {
             sh '''
-            docker pull ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
             docker stop ${FRONTEND_CONTAINER} || true
             docker rm ${FRONTEND_CONTAINER} || true
 
-            docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${REGISTRY}/${IMAGE_NAME}:${APP_VERSION}
+            docker run -d -p 80:80 --name ${FRONTEND_CONTAINER} ${IMAGE_NAME}:${APP_VERSION}
             '''
         }
     }
